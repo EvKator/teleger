@@ -1,0 +1,16 @@
+D:\Projects\c#\Teleger\Teleger\bin\Debug\Teleger.exe.config
+D:\Projects\c#\Teleger\Teleger\obj\Debug\Teleger.csprojResolveAssemblyReference.cache
+D:\Projects\c#\Teleger\Teleger\obj\Debug\Teleger.Properties.Resources.resources
+D:\Projects\c#\Teleger\Teleger\obj\Debug\Teleger.csproj.GenerateResource.Cache
+D:\Projects\c#\Teleger\Teleger\bin\Debug\Teleger.exe
+D:\Projects\c#\Teleger\Teleger\bin\Debug\Teleger.pdb
+D:\Projects\c#\Teleger\Teleger\bin\Debug\BigMath.dll
+D:\Projects\c#\Teleger\Teleger\bin\Debug\Ionic.Zip.dll
+D:\Projects\c#\Teleger\Teleger\bin\Debug\Ionic.ZLib.dll
+D:\Projects\c#\Teleger\Teleger\bin\Debug\TeleSharp.TL.dll
+D:\Projects\c#\Teleger\Teleger\bin\Debug\TLSharp.Core.dll
+D:\Projects\c#\Teleger\Teleger\bin\Debug\Ionic.Zip.xml
+D:\Projects\c#\Teleger\Teleger\obj\Debug\Teleger.Form1.resources
+D:\Projects\c#\Teleger\Teleger\obj\Debug\Teleger.exe
+D:\Projects\c#\Teleger\Teleger\obj\Debug\Teleger.pdb
+D:\Projects\c#\Teleger\Teleger\obj\Debug\Teleger.FormTeleCode.resources
