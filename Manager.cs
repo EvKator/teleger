@@ -88,29 +88,18 @@ namespace Teleger
 
         public async void SendMsg(string username, string text = "QWERTY0")
         {
-            var a = await client.SearchUserAsync(username);  // .GetContactsAsync(); //.ImportByUserName("userName");
+            var a = await client.SearchUserAsync(username);
             try
             {
                 long hash = ((TeleSharp.TL.TLUser)a.Users[0]).AccessHash.Value;
                 int id = ((TeleSharp.TL.TLUser)a.Users[0]).Id;
                 TeleSharp.TL.TLInputPeerUser peer = new TeleSharp.TL.TLInputPeerUser() { UserId = id, AccessHash = hash };
-
-                TeleSharp.TL.TLAbsUpdates up = await this.client.SendMessageAsync(peer, "jkhjkhjkhktart");
-            }catch(Exception ex)
+                TeleSharp.TL.TLAbsUpdates up = await this.client.SendMessageAsync(peer, text);
+            }
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
-            //var b = a.
-            //(TLAbsPeer)a.Results[0]
-            //var c = (await client.GetUserDialogsAsync());
-
-            //var user = c.
-            ////.Where(x => x.GetType() == typeof(TLUser))
-            //.Cast<TLUser>()
-            //.FirstOrDefault(x => x.Username == username);
-            ////IEnumerable<string> contact = c.Users.Where(usr => usr)
-            ////await client.SendMessageAsync(new TLInputPeerUser { UserId = ((TLUser)a.Users[0]).Id}, text);
-            //await client.SendMessageAsync(/*new TLInputPeerUser { UserId = user.Id }*/(TLAbsInputPeer)a.Results[0], text);
         }
 
         public async Task<List<string>> GetAllChatCntacts()
@@ -137,6 +126,50 @@ namespace Teleger
             return list;
         }
 
+        private async Task<TLChannel> FindChannel(string channelname)
+        {
+            var found = await client.SearchUserAsync(channelname);
+            TLChannel tLChannel = (TLChannel)found.Chats[0];
+            return tLChannel;
+        }
+
+        public async void JoinChannel(string channelname)
+        {
+            TLChannel channel = await FindChannel(channelname);
+            var req = new TeleSharp.TL.Channels.TLRequestJoinChannel()
+            {
+                Channel = new TLInputChannel
+                {
+                    ChannelId = channel.Id,
+                    AccessHash = (long)channel.AccessHash
+                }
+            };
+
+            TLUpdates resJoinChannel = await client.SendRequestAsync<TLUpdates>(req);
+        }
+
+        public async void MessageBtnClick(TLMessage message, TLUser user, int Row, int Btn = 0)
+        {
+            int ID = ((TeleSharp.TL.TLUser)user).Id;
+            long hash = ((TeleSharp.TL.TLUser)user).AccessHash.Value;
+
+            if (((((TLReplyInlineMarkup)message.ReplyMarkup).Rows[1]).Buttons[0]).GetType() == typeof(TeleSharp.TL.TLKeyboardButtonUrl)) {
+                var req = new TLRequestGetBotCallbackAnswer()
+                {
+                    MsgId = message.Id,
+                    Peer = new TLInputPeerUser { UserId = ID, AccessHash = hash },
+                    Data = ((TeleSharp.TL.TLKeyboardButtonCallback)(((TeleSharp.TL.TLReplyInlineMarkup)message.ReplyMarkup).Rows[Row]).Buttons[Btn]).Data
+                };
+                await client.SendRequestAsync<Boolean>(req);
+            }
+            else
+            {
+                string Url = ((TeleSharp.TL.TLKeyboardButtonUrl)(((TeleSharp.TL.TLReplyInlineMarkup)message.ReplyMarkup).Rows[Row]).Buttons[Btn]).Url;
+            }
+            
+
+        }
+
         public async void GetLastMessages(string username, int num = 1)
         {
             var a = await client.SearchUserAsync(username);
@@ -149,34 +182,29 @@ namespace Teleger
             var qwe = ((TLMessagesSlice)messages).Messages;
 
             hash = ((TeleSharp.TL.TLUser)a.Users[0]).AccessHash.Value;
-            //TLSharp.Core.Requests.
             foreach (TLMessage message in qwe)
             {
-                var tlMessage = message as TLMessage;
-                str += tlMessage.Message + "\n\n------------\n";
-                var req = new TLRequestGetBotCallbackAnswer()
-                {
-                    MsgId = message.Id,
-                    Peer = new TLInputPeerUser { UserId = ID, AccessHash = hash },
-                    //Response = new TLBotCallbackAnswer { Message = "Перейти к каналу"  }
-                        Data = ((TeleSharp.TL.TLKeyboardButtonCallback)(((TeleSharp.TL.TLReplyInlineMarkup)message.ReplyMarkup).Rows[1]).Buttons[0]).Data
-                    };
-
-                var res = await client.SendRequestAsync<Boolean>(req);
-                ;
-                ;
-                ;
-                //return await TeleSharp.TL.
-
+                str += message.Message + "\n\n------------\n";
             }
+        }
 
+        private async Task<TLUser> FindBot(string botname)
+        {
+            return (TLUser)(await client.SearchUserAsync(botname)).Users[0];
+        }
 
+        public async Task<MyMessage> GetMessage(string username, int num = 0)
+        {
+            TLUser bot = await FindBot(username);
+            int ID = ((TeleSharp.TL.TLUser)bot).Id;
+            long hash = ((TeleSharp.TL.TLUser)bot).AccessHash.Value;
 
-            //run request, and deserialize response to Boolean
-            //return await SendRequestAsync<Boolean>(req);
-
-
-            //return str;
+            var messages = (await client.GetHistoryAsync(new TLInputPeerUser { UserId = ID, AccessHash = hash }, num, 0, 1));
+            var message = (TLMessage)((TLMessagesSlice)messages).Messages[0];
+            MyMessage mymessage = new MyMessage(message,client ,bot );
+            return mymessage;
         }
     }
+
+
 }

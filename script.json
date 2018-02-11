@@ -1,0 +1,38 @@
+{[
+	{
+		username:"EasyyMoneyyBot"
+		script:{
+			sendmsg: "/start",
+			sendmsg: "💲 Подписаться на канал",
+			callbackbtn: 
+			{
+				{
+					Row:0,
+					Btn:0
+				},
+				{
+					Row:1,
+					Btn:0
+				}
+			}
+		}
+	},
+	{
+		username:"EasyyMoneyyBot"
+		script:{
+			sendmsg: "/start",
+			sendmsg: "➕ Подписаться на канал",
+			callbackbtn: 
+			{
+				{
+					Row:0,
+					Btn:0
+				},
+				{
+					Row:1,
+					Btn:0
+				}
+			}
+		}
+	}
+]}

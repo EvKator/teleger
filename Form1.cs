@@ -35,9 +35,9 @@ namespace Teleger
 
         private async void buttonGetMsg_Click(object sender, EventArgs e)
         {
-            /*string messages = await */mngr.GetLastMessages(comboBoxContacts.SelectedItem.ToString(), Convert.ToInt16(textBoxGetMsgsCount.Text));
-            /*richTextBoxLog.Text = messages + "\r\n=================================r\n=================================\r\n" + richTextBoxLog.Text;
-            richTextBoxLog.AppendText(messages);*/
+            MyMessage msg = await mngr.GetMessage(comboBoxContacts.SelectedItem.ToString(), Convert.ToInt16(textBoxGetMsgsCount.Text));
+            msg.Show();
+
         }
 
         private void FillContactList(List<string> contacts)

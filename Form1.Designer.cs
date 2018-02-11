@@ -110,6 +110,7 @@
             this.textBoxGetMsgsCount.Name = "textBoxGetMsgsCount";
             this.textBoxGetMsgsCount.Size = new System.Drawing.Size(100, 20);
             this.textBoxGetMsgsCount.TabIndex = 3;
+            this.textBoxGetMsgsCount.Text = "0";
             // 
             // groupBoxMsgs
             // 
