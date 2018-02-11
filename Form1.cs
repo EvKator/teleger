@@ -20,12 +20,13 @@ namespace Teleger
         Manager mngr;
         private async void buttonConnect_Click(object sender, EventArgs e)
         {
-            mngr = new Manager(textBoxNumber.Text);
+            Telescript script = Telescript.LoadFromFile();
+            /*mngr = new Manager(textBoxNumber.Text);
             bool res = await mngr.Connect(textBoxNumber.Text);
             List<string> chats = await mngr.GetAllChatCntacts();
             FillContactList(chats);
             groupBoxAuthorize.Text = "Authorized";
-            groupBoxContacts.Enabled = true;
+            groupBoxContacts.Enabled = true;*/
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -37,15 +38,11 @@ namespace Teleger
         {
             MyMessage msg = await mngr.GetMessage(comboBoxContacts.SelectedItem.ToString(), Convert.ToInt16(textBoxGetMsgsCount.Text));
             msg.Show();
-
         }
 
         private void FillContactList(List<string> contacts)
         {
-            //for(int i = 0; i < contacts.Count; i++)
-            //{
-                comboBoxContacts.Items.AddRange(contacts.ToArray());
-            //}
+            comboBoxContacts.Items.AddRange(contacts.ToArray());
         }
 
         private void comboBoxContacts_SelectedIndexChanged(object sender, EventArgs e)
