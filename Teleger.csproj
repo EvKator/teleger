@@ -91,9 +91,11 @@
     </Compile>
     <Compile Include="Manager.cs" />
     <Compile Include="MyMessage.cs" />
+    <Compile Include="PersonTask.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Telescript.cs" />
+    <Compile Include="Script.cs" />
+    <Compile Include="Spammer.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

@@ -20,8 +20,9 @@ namespace Teleger
         Manager mngr;
         private async void buttonConnect_Click(object sender, EventArgs e)
         {
-            Telescript script = Telescript.LoadFromFile();
-            /*mngr = new Manager(textBoxNumber.Text);
+            Spammer script = await Spammer.LoadFromFile();
+            await script.Run();
+            /*mngr = Manager.Create(textBoxNumber.Text);
             bool res = await mngr.Connect(textBoxNumber.Text);
             List<string> chats = await mngr.GetAllChatCntacts();
             FillContactList(chats);
@@ -29,14 +30,14 @@ namespace Teleger
             groupBoxContacts.Enabled = true;*/
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
-            mngr.SendMsg(comboBoxContacts.SelectedItem.ToString() , textBoxMsgToSend.Text);
+            await mngr.SendMsg( textBoxMsgToSend.Text);
         }
 
         private async void buttonGetMsg_Click(object sender, EventArgs e)
         {
-            MyMessage msg = await mngr.GetMessage(comboBoxContacts.SelectedItem.ToString(), Convert.ToInt16(textBoxGetMsgsCount.Text));
+            MyMessage msg = await mngr.GetMessage(Convert.ToInt16(textBoxGetMsgsCount.Text));
             msg.Show();
         }
 
@@ -49,6 +50,7 @@ namespace Teleger
         {
             if (!String.IsNullOrWhiteSpace(comboBoxContacts.SelectedItem.ToString()))
             {
+                mngr.CurrentChatName = comboBoxContacts.SelectedItem.ToString();
                 groupBoxMsgs.Enabled = true;
             }
             else

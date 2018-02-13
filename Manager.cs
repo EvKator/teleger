@@ -30,31 +30,35 @@ using Teleger.Properties;
 using TLAuthorization = TeleSharp.TL.Auth.TLAuthorization;
 namespace Teleger
 {
-    class Manager
+    public class Manager
     {
         const int apiId = 191412;
         TelegramClient client = null;
         const string apiHash = "68ed96b9aa9842eb2ded4023c3e32e6e";
         public bool Authorized { get; private set; }
+        public string CurrentChatName { get; set; }
         FileSessionStore store;
-        public Manager(string number)
+        private Manager()
         {
-            //Connect(number);
         }
-        public async Task<bool> Connect(string number)
+        public static async Task<Manager> Create(string number)
         {
-            store = (new FileSessionStore());// "session.dat"
+            Manager mngr = new Manager();
+            mngr.CurrentChatName = "";
+            mngr.Authorized = false;
+
+            mngr.store = (new FileSessionStore());// "session.dat"
             try
             {
-                client = new TelegramClient(apiId, apiHash, store, "session");
-                await client.ConnectAsync();
-                if (!client.IsUserAuthorized() || !client.IsConnected)
+                mngr.client = new TelegramClient(apiId, apiHash, mngr.store, "session");
+                await mngr.client.ConnectAsync();
+                if (!mngr.client.IsUserAuthorized() || !mngr.client.IsConnected)
                     throw new Exception("Need sms code");
                 MessageBox.Show("Authorization success\n" + number);
             }
             catch
             {
-                string hashNumber = await client.SendCodeRequestAsync(number);
+                string hashNumber = await mngr.client.SendCodeRequestAsync(number);
                 for(int attemp = 0; attemp < 3; attemp++)
                 {
                     FormTeleCode ftc = new FormTeleCode();
@@ -64,8 +68,8 @@ namespace Teleger
                         string code = ftc.Code;
                         try
                         {
-                            Confirm(number, hashNumber, code);
-                            Authorized = true;
+                            mngr.Confirm(number, hashNumber, code);
+                            mngr.Authorized = true;
                         }
                         catch(Exception ex)
                         {
@@ -73,11 +77,10 @@ namespace Teleger
                         }
                     }
                     else break;
-                    return false;
                 }
             }
 
-            return true;
+            return mngr;
         }
 
         private async void Confirm(string number, string hashNumber, string code)
@@ -86,9 +89,9 @@ namespace Teleger
             System.Windows.Forms.MessageBox.Show("Authorisation succes\n" + user.FirstName + " " + user.LastName);
         }
 
-        public async void SendMsg(string username, string text = "QWERTY0")
+        public async Task SendMsg(string text)
         {
-            var a = await client.SearchUserAsync(username);
+            var a = await client.SearchUserAsync(CurrentChatName);
             try
             {
                 long hash = ((TeleSharp.TL.TLUser)a.Users[0]).AccessHash.Value;
@@ -170,9 +173,9 @@ namespace Teleger
 
         }
 
-        public async void GetLastMessages(string username, int num = 1)
+        public async void GetLastMessages(int num)
         {
-            var a = await client.SearchUserAsync(username);
+            var a = await client.SearchUserAsync(this.CurrentChatName);
             int ID = ((TeleSharp.TL.TLUser)a.Users[0]).Id;
             long hash = ((TeleSharp.TL.TLUser)a.Users[0]).AccessHash.Value;
 
@@ -188,14 +191,19 @@ namespace Teleger
             }
         }
 
+        public async Task<MyMessage> GetLastMessage()
+        {
+            return await GetMessage(0);
+        }
+
         private async Task<TLUser> FindBot(string botname)
         {
             return (TLUser)(await client.SearchUserAsync(botname)).Users[0];
         }
 
-        public async Task<MyMessage> GetMessage(string username, int num = 0)
+        public async Task<MyMessage> GetMessage(int num = 0)
         {
-            TLUser bot = await FindBot(username);
+            TLUser bot = await FindBot(this.CurrentChatName);
             int ID = ((TeleSharp.TL.TLUser)bot).Id;
             long hash = ((TeleSharp.TL.TLUser)bot).AccessHash.Value;
 
