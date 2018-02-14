@@ -124,7 +124,11 @@ namespace Teleger
 
             public async override void Click(object s, object a)
             {
-                await JoinChannel(Url.Remove(0, 13));
+                try
+                {
+                    await JoinChannel(Url.Remove(0, 13));
+                }
+                catch { }
             }
             private async Task<TLChannel> FindChannel(string channelname)
             {

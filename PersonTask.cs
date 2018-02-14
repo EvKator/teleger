@@ -14,6 +14,7 @@ namespace Teleger
         public List<Script> Scripts { get; set; }
         List<string> chats { get; set; }
         Manager mngr;
+        Log log;
         
         private PersonTask()
         {
@@ -21,26 +22,36 @@ namespace Teleger
         }
 
 
-        public static async Task<PersonTask> Create(string num, string strJson)
+        public static async Task<PersonTask> Create(string num, string strJson, Log log)
         {
             PersonTask ptask = new PersonTask();
+            ptask.log = log;
+            log.Wrt("Signing in " + num);
             Manager mngr = await Manager.Create(num);
-            var chats = mngr.GetAllChatCntacts();
-            ptask.number = num;
-            ptask.mngr = mngr;
-            
-            var Scripts = new List<Script>();
-            JObject json = JObject.Parse(strJson);
-            IList<JToken> results = json["arr"].Children().ToList();
-            foreach (JToken result in results)
+            if (mngr.Authorized)
             {
-                Script script = new Script(mngr, result);
-                Scripts.Add(script);
+                log.Wrt("Authorization success : " + num);
+                var chats = mngr.GetAllChatCntacts();
+                ptask.number = num;
+                ptask.mngr = mngr;
+
+                var Scripts = new List<Script>();
+                JObject json = JObject.Parse(strJson);
+                IList<JToken> results = json["arr"].Children().ToList();
+                foreach (JToken result in results)
+                {
+                    Script script = new Script(mngr, result, ref log);
+                    Scripts.Add(script);
+                }
+
+                ptask.Scripts = Scripts;
+                ptask.chats = await chats;
             }
-            
-            ptask.Scripts = Scripts;
-            ptask.chats = await chats;
-            
+            else
+            {
+                log.Wrt("Authorization failure : " + num);
+                return null;
+            }
             return ptask;
         }
 

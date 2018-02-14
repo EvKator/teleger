@@ -18,7 +18,75 @@
 			]
 		},
 		{
-		"username":"Moneybestbot",
+			"username":"Moneybestbot",
+			"script":[
+				{"sendmsg": "/start"},
+				{"sendmsg": "➕ Подписаться на канал"},
+				{"callbackbtn": 
+				{
+					"Row":"0",
+					"Btn":"0"
+				}},
+				{"callbackbtn": 
+				{
+					"Row":"1",
+					"Btn":"0"
+				}}
+			]
+		},
+		{
+		"username":"ReallyCashbot",
+		"script":[
+			{"sendmsg": "/start"},
+			{"sendmsg": "☄️ Подписаться на канал"},
+			{"callbackbtn": 
+				{
+					"Row":"0",
+					"Btn":"0"
+				}},
+			{"callbackbtn": 
+				{
+					"Row":"1",
+					"Btn":"0"
+				}}
+			]
+		},
+		{
+		"username":"SpeedMoneybot",
+		"script":[
+			{"sendmsg": "/start"},
+			{"sendmsg": "➕ Подписаться на канал"},
+			{"callbackbtn": 
+				{
+					"Row":"0",
+					"Btn":"0"
+				}},
+			{"callbackbtn": 
+				{
+					"Row":"1",
+					"Btn":"0"
+				}}
+			]
+		},
+		{
+		"username":"Moneytellbot",
+		"script":[
+			{"sendmsg": "/start"},
+			{"sendmsg": "➕ Подписаться на канал"},
+			{"callbackbtn": 
+				{
+					"Row":"0",
+					"Btn":"0"
+				}},
+			{"callbackbtn": 
+				{
+					"Row":"1",
+					"Btn":"0"
+				}}
+			]
+		},
+		{
+		"username":"AffoBot",
 		"script":[
 			{"sendmsg": "/start"},
 			{"sendmsg": "➕ Подписаться на канал"},

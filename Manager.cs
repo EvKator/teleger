@@ -35,8 +35,9 @@ namespace Teleger
         const int apiId = 191412;
         TelegramClient client = null;
         const string apiHash = "68ed96b9aa9842eb2ded4023c3e32e6e";
-        public bool Authorized { get; private set; }
+        public bool Authorized { get; set; }
         public string CurrentChatName { get; set; }
+        public string Number { get; set; }
         FileSessionStore store;
         private Manager()
         {
@@ -50,19 +51,21 @@ namespace Teleger
             mngr.store = (new FileSessionStore());// "session.dat"
             try
             {
-                mngr.client = new TelegramClient(apiId, apiHash, mngr.store, "session");
+                mngr.client = new TelegramClient(apiId, apiHash, mngr.store, number.ToString());
                 await mngr.client.ConnectAsync();
                 if (!mngr.client.IsUserAuthorized() || !mngr.client.IsConnected)
                     throw new Exception("Need sms code");
+                mngr.Authorized = true;
                 MessageBox.Show("Authorization success\n" + number);
             }
             catch
             {
                 string hashNumber = await mngr.client.SendCodeRequestAsync(number);
-                for(int attemp = 0; attemp < 3; attemp++)
+                for(int attemp = 0; attemp < 3 && !mngr.Authorized; attemp++)
                 {
                     FormTeleCode ftc = new FormTeleCode();
-                    ftc.Question = "Enter the sms code";
+                    ftc.Question = "Enter the sms code" ;
+                    ftc.Text = number;
                     if (ftc.ShowDialog() == DialogResult.OK)
                     {
                         string code = ftc.Code;
@@ -70,6 +73,7 @@ namespace Teleger
                         {
                             mngr.Confirm(number, hashNumber, code);
                             mngr.Authorized = true;
+                            
                         }
                         catch(Exception ex)
                         {

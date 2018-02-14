@@ -10,16 +10,19 @@ namespace Teleger
 {
     public class Script
     {
+        Log log;
         List<Command> Commands { get; set; }
         string BotName { get; set; }
         Manager mngr {get;set; }
-        public Script(Manager mngr, JToken token)
+        public Script(Manager mngr, JToken token, ref Log log)
         {
+            this.log = log;
             this.mngr = mngr;
             Commands = new List<Command>();
             this.BotName = token["username"].ToString();
-            mngr.CurrentChatName = BotName;
+            log.Wrt("Working wis " + BotName);
             var cmdarr = token["script"].Children().ToList();
+
             for (int i = 0; i < cmdarr.Count;i++)
             {
                 JProperty p = (JProperty)cmdarr[i].First();
@@ -27,12 +30,26 @@ namespace Teleger
                 switch (p.Name)
                 {
                     case "sendmsg":
-                        cmd = new SendMsg(mngr, p.Value.ToString());
+                        try
+                        {
+                            cmd = new SendMsg(mngr, p.Value.ToString());
+                        }
+                        catch(Exception ex)
+                        {
+                            log.Wrt(ex.Message);
+                        }
                         break;
                     case "callbackbtn":
-                        var Row = p.Value["Row"].ToString();
-                        var Btn = p.Value["Btn"].ToString();
-                        cmd = new CallbackBtn(mngr, Convert.ToInt16(Row), Convert.ToInt16(Btn));
+                        try
+                        {
+                            var Row = p.Value["Row"].ToString();
+                            var Btn = p.Value["Btn"].ToString();
+                            cmd = new CallbackBtn(mngr, Convert.ToInt16(Row), Convert.ToInt16(Btn));
+                        }
+                        catch (Exception ex)
+                        {
+                            log.Wrt(ex.Message);
+                        }
                         break;
                     default: break;
                 }
@@ -43,11 +60,16 @@ namespace Teleger
         public async Task Run()
         {
             bool res = true;
-            for(int i = 0; i < Commands.Count && !res; i++)
+            while(res)
+            for(int i = 0; i < Commands.Count && res; i++)
             {
+
+                mngr.CurrentChatName = BotName;
                 res = await Commands[i].Run();
                 await Task.Delay(2000);
+                log.Wrt(Commands[i].ToString() + " : " + res.ToString());
             }
+            //await Task.Delay(10000);
         }
 
         public abstract partial class Command
@@ -73,16 +95,23 @@ namespace Teleger
             }
             public override async Task<bool> Run()
             {
-                System.Windows.Forms.MessageBox.Show("CallbackBtn");
-                MyMessage msg = await mngr.GetLastMessage();
-                MyMessage.Button button = msg.Buttons.Find((MyMessage.Button btn) => { return (btn.Position.Row == Row && btn.Position.Btn == BtnNum); });
-                if (button != null)
+                try
                 {
-                    button.Click(null, null);
+                    MyMessage msg = await mngr.GetLastMessage();
+                    MyMessage.Button button = msg.Buttons.Find((MyMessage.Button btn) => { return (btn.Position.Row == Row && btn.Position.Btn == BtnNum); });
+                    if (button != null)
+                    {
+                        button.Click(null, null);
+                    }
+                    else
+                        return false;
                 }
-                else
-                    return false;
+                catch { return false; }
                 return true;
+            }
+            public override string ToString()
+            {
+                return "[" + this.mngr.Number + " ] CallbackBtn {" + Row + ", " + BtnNum + "}";
             }
         }
         public class SendMsg : Command
@@ -96,15 +125,22 @@ namespace Teleger
             {
                 try
                 {
-                    System.Windows.Forms.MessageBox.Show("SendMsg");
                     await mngr.SendMsg(msg);
                 }
-                catch
+                catch(Exception ex)
                 {
-                    return false;
+                    if (ex.Message == "invalid checksum! skip")
+                        try { await Task.Delay(5000); await mngr.SendMsg(msg); }catch { return false; }
+                    else return false;
                 }
                 return true;
             }
+
+            public override string ToString()
+            {
+                return "[" + this.mngr.Number + " ] SendMsg {" + this.msg + "}";
+            }
         }
+        
     }
 }

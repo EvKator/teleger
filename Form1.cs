@@ -20,14 +20,11 @@ namespace Teleger
         Manager mngr;
         private async void buttonConnect_Click(object sender, EventArgs e)
         {
-            Spammer script = await Spammer.LoadFromFile();
-            await script.Run();
-            /*mngr = Manager.Create(textBoxNumber.Text);
-            bool res = await mngr.Connect(textBoxNumber.Text);
+            mngr = await Manager.Create(textBoxNumber.Text);
             List<string> chats = await mngr.GetAllChatCntacts();
             FillContactList(chats);
             groupBoxAuthorize.Text = "Authorized";
-            groupBoxContacts.Enabled = true;*/
+            groupBoxContacts.Enabled = true;
         }
 
         private async void button1_Click(object sender, EventArgs e)
@@ -57,6 +54,13 @@ namespace Teleger
             {
                 groupBoxMsgs.Enabled = false;
             }
+        }
+
+        private async void buttonLoadScript_Click(object sender, EventArgs e)
+        {
+            Log lg = new Log(ref richTextBoxLog);
+            Spammer script = await Spammer.LoadFromFile("script.json", lg);
+            await script.Run();
         }
     }
 }

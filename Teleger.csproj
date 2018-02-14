@@ -89,6 +89,7 @@
     <Compile Include="FormTeleCode.Designer.cs">
       <DependentUpon>FormTeleCode.cs</DependentUpon>
     </Compile>
+    <Compile Include="Log.cs" />
     <Compile Include="Manager.cs" />
     <Compile Include="MyMessage.cs" />
     <Compile Include="PersonTask.cs" />
