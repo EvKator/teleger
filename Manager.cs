@@ -39,15 +39,14 @@ namespace Teleger
         public string CurrentChatName { get; set; }
         public string Number { get; set; }
         FileSessionStore store;
-        private Manager()
-        {
-        }
+        private Manager(){}
+
         public static async Task<Manager> Create(string number)
         {
             Manager mngr = new Manager();
             mngr.CurrentChatName = "";
             mngr.Authorized = false;
-
+            mngr.Number = number;
             mngr.store = (new FileSessionStore());// "session.dat"
             try
             {
@@ -56,56 +55,104 @@ namespace Teleger
                 if (!mngr.client.IsUserAuthorized() || !mngr.client.IsConnected)
                     throw new Exception("Need sms code");
                 mngr.Authorized = true;
-                MessageBox.Show("Authorization success\n" + number);
+                //MessageBox.Show("Authorization success\n" + number);
             }
             catch
             {
-                string hashNumber = await mngr.client.SendCodeRequestAsync(number);
-                for(int attemp = 0; attemp < 3 && !mngr.Authorized; attemp++)
+                try
                 {
-                    FormTeleCode ftc = new FormTeleCode();
-                    ftc.Question = "Enter the sms code" ;
-                    ftc.Text = number;
-                    if (ftc.ShowDialog() == DialogResult.OK)
+                    string hashNumber = await mngr.client.SendCodeRequestAsync(number);
+                    for (int attemp = 0; attemp < 3 && !mngr.Authorized; attemp++)
                     {
-                        string code = ftc.Code;
-                        try
+                        FormTeleCode ftc = new FormTeleCode();
+                        ftc.Question = "Enter the sms code";
+                        ftc.Text = number;
+                        if (ftc.ShowDialog() == DialogResult.OK)
                         {
-                            mngr.Confirm(number, hashNumber, code);
-                            mngr.Authorized = true;
-                            
+                            string code = ftc.Code;
+                            try
+                            {
+                                var user = await mngr.client.MakeAuthAsync(mngr.Number, hashNumber, code);
+                                mngr.Authorized = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show(number + "Manager Create 0 error" + ex.Message);
+                            }
                         }
-                        catch(Exception ex)
-                        {
-                            MessageBox.Show(ex.Message);
-                        }
+                        else break;
                     }
-                    else break;
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(number + "Manager Create 1 error " + ex.Message);
                 }
             }
 
             return mngr;
         }
 
-        private async void Confirm(string number, string hashNumber, string code)
+        public async Task Reconnect()
         {
-            var user = await client.MakeAuthAsync(number, hashNumber, code);
-            System.Windows.Forms.MessageBox.Show("Authorisation succes\n" + user.FirstName + " " + user.LastName);
-        }
+            Authorized = false;
 
-        public async Task SendMsg(string text)
-        {
-            var a = await client.SearchUserAsync(CurrentChatName);
+            store = (new FileSessionStore());// "session.dat"
             try
             {
-                long hash = ((TeleSharp.TL.TLUser)a.Users[0]).AccessHash.Value;
-                int id = ((TeleSharp.TL.TLUser)a.Users[0]).Id;
-                TeleSharp.TL.TLInputPeerUser peer = new TeleSharp.TL.TLInputPeerUser() { UserId = id, AccessHash = hash };
-                TeleSharp.TL.TLAbsUpdates up = await this.client.SendMessageAsync(peer, text);
+                this.client = new TelegramClient(apiId, apiHash, store, Number.ToString());
+                await client.ConnectAsync();
+                if (!client.IsUserAuthorized() || !client.IsConnected)
+                    throw new Exception("Need sms code");
+                Authorized = true;
             }
-            catch (Exception ex)
+            catch
             {
-                MessageBox.Show(ex.Message);
+                try
+                {
+                    string hashNumber = await client.SendCodeRequestAsync(Number);
+                    for (int attemp = 0; attemp < 3 && !Authorized; attemp++)
+                    {
+                        FormTeleCode ftc = new FormTeleCode();
+                        ftc.Question = "Enter the sms code";
+                        ftc.Text = this.Number;
+                        if (ftc.ShowDialog() == DialogResult.OK)
+                        {
+                            string code = ftc.Code;
+                            try
+                            {
+                                var user = await client.MakeAuthAsync(Number, hashNumber, code);
+                                Authorized = true;
+
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show(Number + "Manager Reconnect 0 error" + ex.Message);
+                            }
+                        }
+                        else break;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(Number + "Manager Reconnect 1 error" + ex.Message);
+                }
+            }
+        }
+
+        public async Task<bool> SendMsg(string text)
+        {
+            try
+            {
+                var a = await FindBot(CurrentChatName);
+                long hash = ((TeleSharp.TL.TLUser)a).AccessHash.Value;
+                int id = ((TeleSharp.TL.TLUser)a).Id;
+                TeleSharp.TL.TLInputPeerUser peer = new TeleSharp.TL.TLInputPeerUser() { UserId = id, AccessHash = hash };
+                await this.client.SendMessageAsync(peer, text);
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -114,10 +161,10 @@ namespace Teleger
             List<string> list = new List<string>();
 
 
-            var dialogs = await client.GetUserDialogsAsync(); // .GetContactsAsync(); //.ImportByUserName("userName");
+            var dialogs = (await client.GetUserDialogsAsync());
             try
             {
-                foreach(var user in ((TLDialogs)dialogs).Users)
+                foreach (var user in ((TeleSharp.TL.Messages.TLDialogsSlice)dialogs).Users)
                 {
                     string uname = ((TLUser)user).Username;
                     if (!string.IsNullOrWhiteSpace(uname) && uname != "null")
@@ -126,7 +173,12 @@ namespace Teleger
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                foreach (var user in ((TeleSharp.TL.Messages.TLDialogs)dialogs).Users)
+                {
+                    string uname = ((TLUser)user).Username;
+                    if (!string.IsNullOrWhiteSpace(uname) && uname != "null")
+                        list.Add(uname);
+                }
             }
 
 
@@ -136,62 +188,72 @@ namespace Teleger
         private async Task<TLChannel> FindChannel(string channelname)
         {
             var found = await client.SearchUserAsync(channelname);
-            TLChannel tLChannel = (TLChannel)found.Chats[0];
+            TLChannel tLChannel = (TLChannel)found.Chats.Where(x => ((TLChannel)x).Username == channelname).FirstOrDefault();
             return tLChannel;
         }
 
-        public async void JoinChannel(string channelname)
+        public async Task<bool> JoinChannel(string channelname)
         {
-            TLChannel channel = await FindChannel(channelname);
-            var req = new TeleSharp.TL.Channels.TLRequestJoinChannel()
+            try
             {
-                Channel = new TLInputChannel
+                TLChannel channel = await FindChannel(channelname);
+                var req = new TeleSharp.TL.Channels.TLRequestJoinChannel()
                 {
-                    ChannelId = channel.Id,
-                    AccessHash = (long)channel.AccessHash
-                }
-            };
-
-            TLUpdates resJoinChannel = await client.SendRequestAsync<TLUpdates>(req);
+                    Channel = new TLInputChannel
+                    {
+                        ChannelId = channel.Id,
+                        AccessHash = (long)channel.AccessHash
+                    }
+                };
+                TLUpdates resJoinChannel = await client.SendRequestAsync<TLUpdates>(req);
+                return true;
+            }
+            catch(Exception e)
+            {
+                return false;
+            }
         }
 
-        public async void MessageBtnClick(TLMessage message, TLUser user, int Row, int Btn = 0)
+        public async Task MessageBtnClick(TLMessage message, int Row, int Btn)
         {
+            var user = await FindBot(CurrentChatName);//////////////////////////////////////////ReadMessageErrorHandle
+            await ReadMessage(user, message);
             int ID = ((TeleSharp.TL.TLUser)user).Id;
             long hash = ((TeleSharp.TL.TLUser)user).AccessHash.Value;
-
-            if (((((TLReplyInlineMarkup)message.ReplyMarkup).Rows[1]).Buttons[0]).GetType() == typeof(TeleSharp.TL.TLKeyboardButtonUrl)) {
-                var req = new TLRequestGetBotCallbackAnswer()
-                {
-                    MsgId = message.Id,
-                    Peer = new TLInputPeerUser { UserId = ID, AccessHash = hash },
-                    Data = ((TeleSharp.TL.TLKeyboardButtonCallback)(((TeleSharp.TL.TLReplyInlineMarkup)message.ReplyMarkup).Rows[Row]).Buttons[Btn]).Data
-                };
+            
+            var req = new TLRequestGetBotCallbackAnswer()
+            {
+                MsgId = message.Id,
+                Peer = new TLInputPeerUser { UserId = ID, AccessHash = hash },
+                Data = ((TeleSharp.TL.TLKeyboardButtonCallback)(((TeleSharp.TL.TLReplyInlineMarkup)message.ReplyMarkup).Rows[Row]).Buttons[Btn]).Data,
+            };
+            try
+            {
                 await client.SendRequestAsync<Boolean>(req);
             }
-            else
+            catch (Exception ex)
             {
-                string Url = ((TeleSharp.TL.TLKeyboardButtonUrl)(((TeleSharp.TL.TLReplyInlineMarkup)message.ReplyMarkup).Rows[Row]).Buttons[Btn]).Url;
+                //Ignore exception.. I did not want it, but library is too bad documented and written (for one night?)
             }
-            
-
         }
 
-        public async void GetLastMessages(int num)
+        public async Task ReadMessage(TLUser user, TLMessage message)
         {
-            var a = await client.SearchUserAsync(this.CurrentChatName);
-            int ID = ((TeleSharp.TL.TLUser)a.Users[0]).Id;
-            long hash = ((TeleSharp.TL.TLUser)a.Users[0]).AccessHash.Value;
-
-            var messages = (await client.GetHistoryAsync(new TLInputPeerUser { UserId = ID, AccessHash = hash }, 0, 0, num));
-
-            string str = "";
-            var qwe = ((TLMessagesSlice)messages).Messages;
-
-            hash = ((TeleSharp.TL.TLUser)a.Users[0]).AccessHash.Value;
-            foreach (TLMessage message in qwe)
+            try
             {
-                str += message.Message + "\n\n------------\n";
+                int ID = ((TeleSharp.TL.TLUser)user).Id;
+                long hash = ((TeleSharp.TL.TLUser)user).AccessHash.Value;
+                var req = new TLRequestReadHistory()
+                {
+                    ConfirmReceived = true,
+                    MessageId = message.Id,
+                    Peer = new TLInputPeerUser { UserId = ID, AccessHash = hash },
+                    Sequence = 2
+                };
+                await client.SendRequestAsync<Boolean>(req);
+            }catch(Exception ex)
+            {
+                //////////////////////////////////////Causes stuped undocumented exceptions, but works norm
             }
         }
 
@@ -210,10 +272,19 @@ namespace Teleger
             TLUser bot = await FindBot(this.CurrentChatName);
             int ID = ((TeleSharp.TL.TLUser)bot).Id;
             long hash = ((TeleSharp.TL.TLUser)bot).AccessHash.Value;
+            MyMessage mymessage = null;
 
             var messages = (await client.GetHistoryAsync(new TLInputPeerUser { UserId = ID, AccessHash = hash }, num, 0, 1));
-            var message = (TLMessage)((TLMessagesSlice)messages).Messages[0];
-            MyMessage mymessage = new MyMessage(message,client ,bot );
+            try
+            {
+                var message = (TLMessage)((TLMessagesSlice)messages).Messages[0];
+                mymessage = new MyMessage(this, message);
+            }
+            catch
+            {
+                var message = (TLMessage)(((TLMessages)messages).Messages[0]);
+                mymessage = new MyMessage(this, message);
+            }
             return mymessage;
         }
     }

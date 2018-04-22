@@ -15,24 +15,27 @@ namespace Teleger
     {
         public string Text { get; private set; }
         public List<Button> Buttons { get; private set; }
-        public TelegramClient client { get; set; }
         public TLMessage message { get; private set; }
-        public TLUser user { get; set; }
-        public MyMessage(TLMessage message, TelegramClient client, TLUser user)
+        public MyMessage(Manager mngr, TLMessage message)
         {
-            this.client = client;
-            this.user = user;
             this.message = message;
             this.Text = message.Message;
             Buttons = new List<Button>();
-            var markup = ((TLReplyInlineMarkup)message.ReplyMarkup);
-            if(markup!=null)
-            for (int row = 0; row < markup.Rows.Count; row++)
+            TLReplyInlineMarkup markup = null;
+            try
             {
-                for(int but = 0; but < markup.Rows[row].Buttons.Count; but++)
+                markup = ((TLReplyInlineMarkup)message.ReplyMarkup);
+            }
+            catch { }
+            if (markup != null)
+            {
+                for (int row = 0; row < markup.Rows.Count; row++)
                 {
-                    Button button = Button.Create(this, markup.Rows[row].Buttons[but], new Button.BtnPosition { Row = row, Btn = but });
-                    Buttons.Add(button);
+                    for (int but = 0; but < markup.Rows[row].Buttons.Count; but++)
+                    {
+                        Button button = Button.Create(mngr, message, markup.Rows[row].Buttons[but], new Button.BtnPosition { Row = row, Btn = but });
+                        Buttons.Add(button);
+                    }
                 }
             }
         }
@@ -50,33 +53,28 @@ namespace Teleger
             public string Caption { get; protected set; }
             public BtnPosition Position { get; protected set; }
             protected ButtonType type { get; set; }
+            protected Manager mngr;
             protected TLMessage message { get; private set; }
-            //protected TLUser user;
-            protected int ID { get; private set; }
-            protected long hash { get; private set; }
-            protected TelegramClient client { get; private set; }
             public struct BtnPosition
             {
                 public int Row { get; set; }
                 public int Btn { get; set; }
             }
-            public Button(MyMessage mymessage, BtnPosition pos)
+            public Button(Manager mngr, TLMessage message, BtnPosition pos)
             {
-                this.message = mymessage.message;
-                this.client = mymessage.client;
+                this.mngr = mngr;
+                this.message = message;
                 this.Position = pos;
-                ID = ((TeleSharp.TL.TLUser)mymessage.user).Id;
-                hash = ((TeleSharp.TL.TLUser)mymessage.user).AccessHash.Value;
             }
-            public static Button Create(MyMessage mymessage,TLAbsKeyboardButton msgbtn, BtnPosition pos)
+            public static Button Create(Manager mngr, TLMessage message, TLAbsKeyboardButton msgbtn, BtnPosition pos)
             {
                 try
                 {
-                    return new DataButton(mymessage, (TLKeyboardButtonCallback)msgbtn, pos);
+                    return new DataButton(mngr, message, (TLKeyboardButtonCallback)msgbtn, pos);
                 }
                 catch
                 {
-                    return new UrlButton(mymessage, (TLKeyboardButtonUrl)msgbtn, pos);
+                    return new UrlButton(mngr, message, (TLKeyboardButtonUrl)msgbtn, pos);
                 }
             }
             public async virtual void Click(object s, object a) { }
@@ -86,36 +84,22 @@ namespace Teleger
         {
             public byte[] Data { get; private set; }
             
-            public DataButton(MyMessage mymessage, TLKeyboardButtonCallback msgbtn, BtnPosition pos) :base(mymessage, pos)
+            public DataButton(Manager mngr, TLMessage message, TLKeyboardButtonCallback msgbtn, BtnPosition pos) :base(mngr, message, pos)
             {
                 type = ButtonType.Data;
-                this.Data = msgbtn.Data;
                 this.Caption = msgbtn.Text;
             }
 
             public async override void Click(object s, object a)
             {
-                var req = new TLRequestGetBotCallbackAnswer()
-                {
-                    MsgId = message.Id,
-                    Peer = new TLInputPeerUser { UserId = ID , AccessHash = hash },
-                    Data = this.Data
-                };
-                try
-                {
-                    await client.SendRequestAsync<Boolean>(req);
-                }
-                catch
-                {
-
-                }
+                await mngr.MessageBtnClick(message, Position.Row, Position.Btn);
             }
         }
 
         public class UrlButton:Button
         {
             public string Url { get; private set; }
-            public UrlButton(MyMessage mymessage, TLKeyboardButtonUrl msgbtn, BtnPosition pos) : base(mymessage, pos)
+            public UrlButton(Manager mngr, TLMessage message, TLKeyboardButtonUrl msgbtn, BtnPosition pos) : base(mngr, message, pos)
             {
                 type = ButtonType.Data;
                 this.Url = msgbtn.Url;
@@ -126,31 +110,11 @@ namespace Teleger
             {
                 try
                 {
-                    await JoinChannel(Url.Remove(0, 13));
+                    await mngr.JoinChannel(Url.Remove(0, 13));
                 }
-                catch { }
+                catch (Exception ex) {  }
             }
-            private async Task<TLChannel> FindChannel(string channelname)
-            {
-                var found = await client.SearchUserAsync(channelname);
-                TLChannel tLChannel = (TLChannel)found.Chats[0];
-                return tLChannel;
-            }
-
-            public async Task JoinChannel(string channelname)
-            {
-                TLChannel channel = await FindChannel(channelname);
-                var req = new TeleSharp.TL.Channels.TLRequestJoinChannel()
-                {
-                    Channel = new TLInputChannel
-                    {
-                        ChannelId = channel.Id,
-                        AccessHash = (long)channel.AccessHash
-                    }
-                };
-
-                TLUpdates resJoinChannel = await client.SendRequestAsync<TLUpdates>(req);
-            }
+            
         }
 
     }

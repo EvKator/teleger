@@ -15,26 +15,23 @@ namespace Teleger
         Log log;
         public static async Task<Spammer> LoadFromFile(string filename, Log log)
         {
-            string[] numbers = System.IO.File.ReadAllLines("nums.txt");
-            string str = System.IO.File.ReadAllText(filename);
-            List<PersonTask> ptasks = new List<PersonTask>();
-            for(int i = 0; i < numbers.Count(); i++)
+            try
             {
-                PersonTask ptask = await PersonTask.Create(numbers[i], str, log);
-                ptasks.Add(ptask);
-            }
-            
-            return new Spammer() { pertasks = ptasks, log = log };
-        }
-  
-    
-        public async Task Run()
-        {
-            for(int i = 0; i < pertasks.Count; i++)
+                string[] numbers = System.IO.File.ReadAllLines("nums.txt");
+                string str = System.IO.File.ReadAllText(filename);
+                List<PersonTask> ptasks = new List<PersonTask>();
+                List<Task<PersonTask>> ttasks = new List<Task<PersonTask>>();
+                for (int i = 0; i < numbers.Count(); i++)
+                {
+                    Task<PersonTask> ptask = PersonTask.Create(numbers[i], str, log);
+                    ttasks.Add(ptask);
+                    await Task.Delay(10000);
+                }
+                return new Spammer() { pertasks = ptasks, log = log };
+            }catch(Exception ex)
             {
-                log.Wrt("Task" + pertasks[i].number + "started");
-                await pertasks[i].Run();
-                log.Wrt("Task" + pertasks[i].number + "done");
+                log.Wrt("Spammer LoadFromFile 0 error" + ex.Message);
+                return null;
             }
         }
         

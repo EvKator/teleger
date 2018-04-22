@@ -59,8 +59,7 @@ namespace Teleger
         private async void buttonLoadScript_Click(object sender, EventArgs e)
         {
             Log lg = new Log(ref richTextBoxLog);
-            Spammer script = await Spammer.LoadFromFile("script.json", lg);
-            await script.Run();
+            Spammer spammer = await Spammer.LoadFromFile("script.json", lg);
         }
     }
 }

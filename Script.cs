@@ -18,56 +18,68 @@ namespace Teleger
         {
             this.log = log;
             this.mngr = mngr;
-            Commands = new List<Command>();
-            this.BotName = token["username"].ToString();
-            log.Wrt("Working wis " + BotName);
-            var cmdarr = token["script"].Children().ToList();
-
-            for (int i = 0; i < cmdarr.Count;i++)
+            try
             {
-                JProperty p = (JProperty)cmdarr[i].First();
-                Command cmd = null;
-                switch (p.Name)
+                Commands = new List<Command>();
+                mngr.CurrentChatName = this.BotName = token["username"].ToString();
+                log.Wrt("Working wis " + BotName);
+                var cmdarr = token["script"].Children().ToList();
+
+                for (int i = 0; i < cmdarr.Count; i++)
                 {
-                    case "sendmsg":
-                        try
-                        {
-                            cmd = new SendMsg(mngr, p.Value.ToString());
-                        }
-                        catch(Exception ex)
-                        {
-                            log.Wrt(ex.Message);
-                        }
-                        break;
-                    case "callbackbtn":
-                        try
-                        {
-                            var Row = p.Value["Row"].ToString();
-                            var Btn = p.Value["Btn"].ToString();
-                            cmd = new CallbackBtn(mngr, Convert.ToInt16(Row), Convert.ToInt16(Btn));
-                        }
-                        catch (Exception ex)
-                        {
-                            log.Wrt(ex.Message);
-                        }
-                        break;
-                    default: break;
+                    JProperty p = (JProperty)cmdarr[i].First();
+                    Command cmd = null;
+                    switch (p.Name)
+                    {
+                        case "sendmsg":
+                            try
+                            {
+                                cmd = new SendMsg(mngr, p.Value.ToString());
+                            }
+                            catch (Exception ex)
+                            {
+                                log.Wrt(mngr.Number + "Script Constructor 0 error" + ex.Message);
+                            }
+                            break;
+                        case "callbackbtn":
+                            try
+                            {
+                                var Row = p.Value["Row"].ToString();
+                                var Btn = p.Value["Btn"].ToString();
+                                cmd = new CallbackBtn(mngr, Convert.ToInt16(Row), Convert.ToInt16(Btn));
+                            }
+                            catch (Exception ex)
+                            {
+                                log.Wrt(mngr.Number + "Script Constructor 1 error" + ex.Message);
+                            }
+                            break;
+                        default: break;
+                    }
+                    Commands.Add(cmd);
                 }
-                this.Commands.Add(cmd);
+            }catch(Exception ex)
+            {
+                log.Wrt(mngr.Number + "Script Constructor 2 error" + ex.Message);
             }
         }
         
-        public async Task Run()
+        public async Task<bool> Run()
         {
-            bool res = true;
-            while(res)
-            for(int i = 0; i < Commands.Count && res; i++)
+            try
             {
-
-                mngr.CurrentChatName = BotName;
-                res = await Commands[i].Run();
-                await Task.Delay(2000);
-                log.Wrt(Commands[i].ToString() + " : " + res.ToString());
+                bool res = true;
+                for (int i = 0; i < Commands.Count && res; i++)
+                {
+                    res = await Commands[i].Run();
+                    await Task.Delay(15000);
+                    log.Wrt(Commands[i].ToString() + " : " + res.ToString());
+                }
+                return res;
+            }
+            catch (Exception ex)
+            {
+                //log.Wrt(mngr.Number + "Script Run 0 error" + ex.Message);
+                return false;
             }
             //await Task.Delay(10000);
         }
@@ -95,19 +107,29 @@ namespace Teleger
             }
             public override async Task<bool> Run()
             {
-                try
+                bool done = false;
+                int attemp = 0;
+                for (; attemp < 3 && !done; attemp++)
                 {
-                    MyMessage msg = await mngr.GetLastMessage();
-                    MyMessage.Button button = msg.Buttons.Find((MyMessage.Button btn) => { return (btn.Position.Row == Row && btn.Position.Btn == BtnNum); });
-                    if (button != null)
+                    try
                     {
-                        button.Click(null, null);
+                        MyMessage msg = await mngr.GetLastMessage();
+                        MyMessage.Button button = msg.Buttons.Find((MyMessage.Button btn) => { return (btn.Position.Row == Row && btn.Position.Btn == BtnNum); });
+                        if (button != null)
+                        {
+                            button.Click(null, null);
+                            done = true;
+                        }
+                        else
+                            return false;
                     }
-                    else
-                        return false;
+                    catch (Exception ex)
+                    {
+                            await mngr.Reconnect();
+                    }
                 }
-                catch { return false; }
-                return true;
+                //if (attemp == 3) System.Windows.Forms.MessageBox.Show(mngr.Number + " AUTH_KEY_UNREGISTERED");
+                return done;
             }
             public override string ToString()
             {
@@ -123,17 +145,22 @@ namespace Teleger
             }
             public override async Task<bool> Run()
             {
-                try
+                bool done = false;
+                int attemp = 0;
+                for(; attemp < 3 && !done; attemp++)
                 {
-                    await mngr.SendMsg(msg);
+                    try
+                    {
+                        await mngr.SendMsg(msg);
+                        done = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        await mngr.Reconnect();
+                    }
                 }
-                catch(Exception ex)
-                {
-                    if (ex.Message == "invalid checksum! skip")
-                        try { await Task.Delay(5000); await mngr.SendMsg(msg); }catch { return false; }
-                    else return false;
-                }
-                return true;
+                //if (attemp == 3) System.Windows.Forms.MessageBox.Show(mngr.Number + " AUTH_KEY_UNREGISTERED");
+                return done;
             }
 
             public override string ToString()
