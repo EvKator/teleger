@@ -53,13 +53,6 @@ namespace Teleger
                 mngr.client = new TelegramClient(apiId, apiHash, mngr.store, number.ToString());
                 await mngr.client.ConnectAsync();
                 if (!mngr.client.IsUserAuthorized() || !mngr.client.IsConnected)
-                    throw new Exception("Need sms code");
-                mngr.Authorized = true;
-                //MessageBox.Show("Authorization success\n" + number);
-            }
-            catch
-            {
-                try
                 {
                     string hashNumber = await mngr.client.SendCodeRequestAsync(number);
                     for (int attemp = 0; attemp < 3 && !mngr.Authorized; attemp++)
@@ -83,31 +76,41 @@ namespace Teleger
                         else break;
                     }
                 }
-                catch(Exception ex)
-                {
-                    MessageBox.Show(number + "Manager Create 1 error " + ex.Message);
-                }
+                mngr.Authorized = true;
+                //MessageBox.Show("Authorization success\n" + number);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(number + "Manager Create 1 error " + ex.Message);
             }
 
             return mngr;
         }
 
-        public async Task Reconnect()
+        public bool RemoveSession()
         {
-            Authorized = false;
-
-            store = (new FileSessionStore());// "session.dat"
             try
             {
-                this.client = new TelegramClient(apiId, apiHash, store, Number.ToString());
-                await client.ConnectAsync();
-                if (!client.IsUserAuthorized() || !client.IsConnected)
-                    throw new Exception("Need sms code");
-                Authorized = true;
+                System.IO.File.Delete(Number.ToString() + ".dat");
+                return true;
             }
             catch
             {
-                try
+                return false;
+            }
+        }
+
+        public async Task<bool> Reconnect()
+        {
+            Authorized = false;
+            store = null;
+            
+            try
+            {
+                store = (new FileSessionStore());// "session.dat"
+                this.client = new TelegramClient(apiId, apiHash, store, Number.ToString());
+                await client.ConnectAsync(false);
+                if (!client.IsUserAuthorized() || !client.IsConnected)
                 {
                     string hashNumber = await client.SendCodeRequestAsync(Number);
                     for (int attemp = 0; attemp < 3 && !Authorized; attemp++)
@@ -132,10 +135,13 @@ namespace Teleger
                         else break;
                     }
                 }
-                catch(Exception ex)
-                {
-                    MessageBox.Show(Number + "Manager Reconnect 1 error" + ex.Message);
-                }
+                Authorized = true;
+                return true;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(Number + "Manager Reconnect 1 error" + ex.Message);
+                return false;
             }
         }
 
@@ -150,8 +156,14 @@ namespace Teleger
                 await this.client.SendMessageAsync(peer, text);
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
+                if(ex.Message == "AUTH_KEY_UNREGISTERED")
+                {
+                    bool sessionRemoved = this.RemoveSession();
+                    if (sessionRemoved)
+                        await this.Reconnect();
+                }
                 return false;
             }
         }
@@ -208,32 +220,59 @@ namespace Teleger
                 TLUpdates resJoinChannel = await client.SendRequestAsync<TLUpdates>(req);
                 return true;
             }
-            catch(Exception e)
+            catch(Exception ex)
             {
+                if (ex.Message == "AUTH_KEY_UNREGISTERED")
+                {
+                    bool sessionRemoved = this.RemoveSession();
+                    if (sessionRemoved)
+                        await this.Reconnect();
+                }
                 return false;
             }
         }
 
-        public async Task MessageBtnClick(TLMessage message, int Row, int Btn)
+        public async Task<bool> MessageBtnClick(TLMessage message, int Row, int Btn)
         {
-            var user = await FindBot(CurrentChatName);//////////////////////////////////////////ReadMessageErrorHandle
-            await ReadMessage(user, message);
-            int ID = ((TeleSharp.TL.TLUser)user).Id;
-            long hash = ((TeleSharp.TL.TLUser)user).AccessHash.Value;
-            
-            var req = new TLRequestGetBotCallbackAnswer()
-            {
-                MsgId = message.Id,
-                Peer = new TLInputPeerUser { UserId = ID, AccessHash = hash },
-                Data = ((TeleSharp.TL.TLKeyboardButtonCallback)(((TeleSharp.TL.TLReplyInlineMarkup)message.ReplyMarkup).Rows[Row]).Buttons[Btn]).Data,
-            };
             try
             {
-                await client.SendRequestAsync<Boolean>(req);
+                var user = await FindBot(CurrentChatName);//////////////////////////////////////////ReadMessageErrorHandle
+                await ReadMessage(user, message);
+                int ID = ((TeleSharp.TL.TLUser)user).Id;
+                long hash = ((TeleSharp.TL.TLUser)user).AccessHash.Value;
+
+                var req = new TLRequestGetBotCallbackAnswer()
+                {
+                    MsgId = message.Id,
+                    Peer = new TLInputPeerUser { UserId = ID, AccessHash = hash },
+                    Data = ((TeleSharp.TL.TLKeyboardButtonCallback)(((TeleSharp.TL.TLReplyInlineMarkup)message.ReplyMarkup).Rows[Row]).Buttons[Btn]).Data,
+                };
+                try
+                {
+                    await client.SendRequestAsync<Boolean>(req);
+                }
+                catch (Exception ex)
+                {
+                    if (ex.Message == "AUTH_KEY_UNREGISTERED")
+                    {
+                        bool sessionRemoved = this.RemoveSession();
+                        if (sessionRemoved)
+                            await this.Reconnect();
+                        return false;
+                    }
+                    //Ignore exception.. I did not want it, but library is too bad documented and written (for one night?)
+                }
+                return true;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                //Ignore exception.. I did not want it, but library is too bad documented and written (for one night?)
+                if (ex.Message == "AUTH_KEY_UNREGISTERED")
+                {
+                    bool sessionRemoved = this.RemoveSession();
+                    if (sessionRemoved)
+                        await this.Reconnect();
+                }
+                return false;
             }
         }
 

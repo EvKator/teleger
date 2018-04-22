@@ -12,19 +12,12 @@ namespace Teleger
 {
     public partial class FormMessage : Form
     {
-        public MyMessage.Button[] buttons
+        public void addButton(MyMessage.Button messageBtn)
         {
-            set
-            {
-                flowLayoutPanelButtons.Controls.Clear();
-                for(int i = 0; i < value.Length; i++)
-                {
-                    Button but = new Button() { Height = 20, Text = value[i].Caption };
-                    EventHandler eh = new EventHandler(value[i].Click);
-                    but.Click += eh;
-                    flowLayoutPanelButtons.Controls.Add(but);
-                }
-            }
+            Button formBtn = new Button() { Height = 20, Text = messageBtn.Caption };
+            EventHandler eh = new EventHandler(async (e,s) =>await messageBtn.Click(e,s));
+            formBtn.Click += eh;
+            flowLayoutPanelButtons.Controls.Add(formBtn);
         }
         public string Message
         {

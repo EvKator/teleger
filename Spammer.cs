@@ -20,18 +20,25 @@ namespace Teleger
                 string[] numbers = System.IO.File.ReadAllLines("nums.txt");
                 string str = System.IO.File.ReadAllText(filename);
                 List<PersonTask> ptasks = new List<PersonTask>();
-                List<Task<PersonTask>> ttasks = new List<Task<PersonTask>>();
                 for (int i = 0; i < numbers.Count(); i++)
                 {
-                    Task<PersonTask> ptask = PersonTask.Create(numbers[i], str, log);
-                    ttasks.Add(ptask);
-                    await Task.Delay(10000);
+                    PersonTask ptask = await PersonTask.Create(numbers[i], str, log);
+                    ptasks.Add(ptask);
                 }
                 return new Spammer() { pertasks = ptasks, log = log };
             }catch(Exception ex)
             {
                 log.Wrt("Spammer LoadFromFile 0 error" + ex.Message);
                 return null;
+            }
+        }
+
+        public async Task Start(int delay = 10000)
+        {
+            foreach(var pertask in pertasks)
+            {
+                pertask.Start();
+                await Task.Delay(delay);
             }
         }
         

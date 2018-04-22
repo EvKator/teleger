@@ -44,7 +44,10 @@ namespace Teleger
         {
             FormMessage fmsg = new FormMessage();
             fmsg.Message = this.Text;
-            fmsg.buttons = this.Buttons.ToArray();
+            foreach(var messageBtn in this.Buttons)
+            {
+                fmsg.addButton(messageBtn);
+            }
             fmsg.ShowDialog();
         }
         public abstract class Button
@@ -77,7 +80,7 @@ namespace Teleger
                     return new UrlButton(mngr, message, (TLKeyboardButtonUrl)msgbtn, pos);
                 }
             }
-            public async virtual void Click(object s, object a) { }
+            public async virtual Task<bool> Click(object s, object a) { return false; }
         }
 
         public class DataButton:Button
@@ -90,9 +93,9 @@ namespace Teleger
                 this.Caption = msgbtn.Text;
             }
 
-            public async override void Click(object s, object a)
+            public async override Task<bool> Click(object s, object a)
             {
-                await mngr.MessageBtnClick(message, Position.Row, Position.Btn);
+                return await mngr.MessageBtnClick(message, Position.Row, Position.Btn);
             }
         }
 
@@ -106,13 +109,9 @@ namespace Teleger
                 this.Caption = this.Url;
             }
 
-            public async override void Click(object s, object a)
+            public async override Task<bool> Click(object s, object a)
             {
-                try
-                {
-                    await mngr.JoinChannel(Url.Remove(0, 13));
-                }
-                catch (Exception ex) {  }
+                return await mngr.JoinChannel(Url.Remove(0, 13));
             }
             
         }

@@ -60,6 +60,7 @@ namespace Teleger
         {
             Log lg = new Log(ref richTextBoxLog);
             Spammer spammer = await Spammer.LoadFromFile("script.json", lg);
+            spammer.Start();
         }
     }
 }
