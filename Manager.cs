@@ -51,7 +51,7 @@ namespace Teleger
             try
             {
                 mngr.client = new TelegramClient(apiId, apiHash, mngr.store, number.ToString());
-                await mngr.client.ConnectAsync();
+                await mngr.client.ConnectAsync(false);
                 if (!mngr.client.IsUserAuthorized() || !mngr.client.IsConnected)
                 {
                     string hashNumber = await mngr.client.SendCodeRequestAsync(number);

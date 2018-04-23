@@ -36,7 +36,6 @@ namespace Teleger
                     Script script = await Script.Create(num, jsonScript, log);
                     ptask.Scripts.Add(script);
                 }
-                System.Windows.Forms.MessageBox.Show(num + " task done");
                 return ptask;
             }
             catch (Exception ex)

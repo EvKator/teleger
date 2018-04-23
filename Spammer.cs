@@ -13,29 +13,32 @@ namespace Teleger
     {
         List<PersonTask> pertasks { get; set; }
         Log log;
-        public static async Task<Spammer> LoadFromFile(string filename, Log log)
+        public static async Task<Spammer> LoadFromFile(string filename, string numsfilename, Log log)
         {
             try
             {
-                string[] numbers = System.IO.File.ReadAllLines("nums.txt");
+                string[] numbers = System.IO.File.ReadAllLines(numsfilename);
                 string str = System.IO.File.ReadAllText(filename);
                 List<PersonTask> ptasks = new List<PersonTask>();
                 for (int i = 0; i < numbers.Count(); i++)
                 {
+                    log.Wrt("Creating task for " + numbers[i]);
                     PersonTask ptask = await PersonTask.Create(numbers[i], str, log);
                     ptasks.Add(ptask);
                 }
                 return new Spammer() { pertasks = ptasks, log = log };
             }catch(Exception ex)
             {
-                log.Wrt("Spammer LoadFromFile 0 error" + ex.Message);
+                System.Windows.Forms.MessageBox.Show("Spammer LoadFromFile 0 error" + ex.Message);
                 return null;
             }
         }
 
         public async Task Start(int delay = 10000)
         {
-            foreach(var pertask in pertasks)
+            log.Wrt("-------------------");
+            log.Wrt("Tasks performing: \n");
+            foreach (var pertask in pertasks)
             {
                 pertask.Start();
                 await Task.Delay(delay);

@@ -34,7 +34,7 @@ namespace Teleger
                 throw new Exception("username parsing error");
             }
 
-            log.Wrt("Working with " + script.BotName);
+            log.Wrt("Script processing for " + script.BotName);
 
             List<Newtonsoft.Json.Linq.JToken> cmdarr;
 
@@ -51,37 +51,28 @@ namespace Teleger
             {
                 JProperty p = (JProperty)cmdarr[i].First();
                 Command cmd = null;
-                switch (p.Name)
+                try
                 {
-                    case "sendmsg":
-                        try
-                        {
+                    switch (p.Name)
+                    {
+                        case "sendmsg":
                             cmd = new SendMsg(mngr, p.Value.ToString());
-                        }
-                        catch (Exception ex)
-                        {
-                            ///////
-                            //log.Wrt(mngr.Number + "| sendmsg command creation error: " + ex.Message);
-                            throw new Exception("sendmsg command creation error");
-                        }
-                        break;
-                    case "callbackbtn":
-                        try
-                        {
+                            break;
+                        case "callbackbtn":
                             var Row = p.Value["Row"].ToString();
                             var Btn = p.Value["Btn"].ToString();
                             cmd = new CallbackBtn(mngr, Convert.ToInt16(Row), Convert.ToInt16(Btn));
-                        }
-                        catch (Exception ex)
-                        {
-                            //log.Wrt(mngr.Number + "| callbackbtn command creation error: " + ex.Message);
-                            throw new Exception("callbackbtn command creation error");
-                        }
-                        break;
-                    default: break;
+                            break;
+                        default: break;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    throw new Exception(p.Name + " command creation error");
                 }
                 script.Commands.Add(cmd);
             }
+            log.Wrt("OK");
             return script;
         }
         private Script()

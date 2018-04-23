@@ -1,204 +1,30 @@
 {
 	"arr":
-	[
-		{
-			"username":"SpeedMoneybot",
-			"script":
-			[
-				{"sendmsg": "/start"},
-				{"sendmsg": "➕ Подписаться на канал"},
-				{"callbackbtn": 
-					{
-					"Row":"0",
-					"Btn":"0"
-					}
-				},
-				{"callbackbtn": 
-					{
-					"Row":"1",
-					"Btn":"0"
-					}
-				}
-			]
-		},
-		{
-			"username":"Moneytellbot",
-			"script":
-			[
-				{"sendmsg": "/start"},
-				{"sendmsg": "➕ Подписаться на канал"},
-				{"callbackbtn": 
-					{
-					"Row":"0",
-					"Btn":"0"
-					}
-				},
-				{"callbackbtn": 
-					{
-					"Row":"1",
-					"Btn":"0"
-					}
-				}
-			]
-		},
-		{
-			"username":"AffoBot",
-			"script":
-			[
-				{"sendmsg": "/start"},
-				{"sendmsg": "➕ Подписаться на канал"},
-				{"callbackbtn": 
-					{
-					"Row":"0",
-					"Btn":"0"
-					}
-				},
-				{"callbackbtn": 
-					{
-					"Row":"1",
-					"Btn":"0"
-					}
-				}
-			]
-		},
-		{
-			"username":"NewPiarbot",
-			"script":
-			[
-				{"sendmsg": "/start"},
-				{"sendmsg": "➕ Подписаться на канал"},
-				{"callbackbtn": 
-					{
-					"Row":"0",
-					"Btn":"0"
-					}
-				},
-				{"callbackbtn": 
-					{
-					"Row":"1",
-					"Btn":"0"
-					}
-				}
-			]
-		}
-		,
-		{
-			"username":"ReallyCashbot",
-			"script":
-			[
-				{"sendmsg": "/start"},
-				{"sendmsg": "☄️ Подписаться на канал"},
-				{"callbackbtn": 
-					{
-					"Row":"0",
-					"Btn":"0"
-					}
-				},
-				{"callbackbtn": 
-					{
-					"Row":"1",
-					"Btn":"0"
-					}
-				}
-			]
-		},
-		{
-			"username":"Moneybestbot",
-			"script":
-			[
-				{"sendmsg": "/start"},
-				{"sendmsg": "➕ Подписаться на канал"},
-				{"callbackbtn": 
-					{
-					"Row":"0",
-					"Btn":"0"
-					}
-				},
-				{"callbackbtn": 
-					{
-					"Row":"1",
-					"Btn":"0"
-					}
-				}
-			]
-		},
-		{
-			"username":"EasyyMoneyyBot",
-			"script":
-			[
-				{"sendmsg": "/start"},
-				{"sendmsg": "💲 Подписаться на канал"},
-				{"callbackbtn": 
-					{
-						"Row":"0",
-						"Btn":"0"
-					}
-				},
-				{"callbackbtn": 
-					{
-						"Row":"1",
-						"Btn":"0"
-					}
-				}
-			]
-		},
-		{
-		"username":"PiarRobot",
-		"script":
-			[
-				{"sendmsg": "/start"},
-				{"sendmsg": "📝 Подписаться на канал"},
-				{"callbackbtn": 
-					{
-						"Row":"0",
-						"Btn":"0"
-					}
-				},
-				{"callbackbtn": 
-					{
-						"Row":"1",
-						"Btn":"0"
-					}
-				}
-			]
-		},
-		{
-		"username":"FastMoneyRobot",
-		"script":
-			[
-				{"sendmsg": "/start"},
-				{"sendmsg": "💲 Подписаться на канал"},
-				{"callbackbtn": 
-					{
-						"Row":"0",
-						"Btn":"0"
-					}
-				},
-				{"callbackbtn": 
-					{
-						"Row":"1",
-						"Btn":"0"
-					}
-				}
-			]
-		},
-		{
-		"username":"MoneyTelega_bot",
-		"script":[
-			{"sendmsg": "/start"},
-			{"sendmsg": "➕ Подписаться на канал"},
-			{"callbackbtn": 
-				{
-					"Row":"0",
-					"Btn":"0"
-				}},
-			{"callbackbtn": 
-				{
-					"Row":"1",
-					"Btn":"0"
-				}}
-			]
-		}
-		
+	[{
+  "username": "VKLikeBot",
+  "script": [
+    {
+      "sendmsg": ""
+    },
+    {
+      "sendmsg": "/menu"
+    }
+  ]
+}
+,
+{
+  "username": "VKLikeBot",
+  "script": [
+    {
+      "sendmsg": "/menu"
+    },
+    {
+      "callbackbtn": {
+        "Row": "0",
+        "Btn": "0"
+      }
+    }
+  ]
+}
 	]
 }
