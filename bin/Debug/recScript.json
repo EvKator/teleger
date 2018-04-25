@@ -1,0 +1,21 @@
+{
+	"arr":
+	[{
+  "username": "AffoBot",
+  "script": [
+    {
+      "sendmsg": "/start"
+    },
+    {
+      "sendmsg": "➕ Подписаться на канал"
+    },
+    {
+      "callbackbtn": {
+        "Row": "1",
+        "Btn": "0"
+      }
+    }
+  ]
+}
+	]
+}

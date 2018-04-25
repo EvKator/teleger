@@ -1,0 +1,12 @@
+{
+	"arr":
+	[{
+  "username": "Moneytellbot",
+  "script": [
+    {
+      "sendmsg": "/start"
+    }
+  ]
+}
+	]
+}

@@ -1,0 +1,30 @@
+{
+	"arr":
+	[{
+  "username": "Moneytellbot",
+  "script": [
+    {
+      "sendmsg": "/menu"
+    }
+  ]
+}
+,
+{
+  "username": "EasyyMoneyyBot",
+  "script": [
+    {
+      "sendmsg": "/menu"
+    }
+  ]
+}
+,
+{
+  "username": "AffoBot",
+  "script": [
+    {
+      "sendmsg": "/menu"
+    }
+  ]
+}
+	]
+}

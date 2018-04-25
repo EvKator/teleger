@@ -14,7 +14,6 @@ namespace Teleger
         List<Command> Commands { get; set; }
         string BotName { get; set; }
         Manager mngr {get;set; }
-
         public static async Task<Script> Create(string num, JToken token, Log log)
         {
             Script script = new Script();

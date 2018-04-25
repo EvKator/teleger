@@ -1,0 +1,33 @@
+{
+	"arr":
+	[{
+  "username": "VKLikeBot",
+  "script": [
+    {
+      "sendmsg": "/start"
+    },
+    {
+      "callbackbtn": {
+        "Row": "0",
+        "Btn": "0"
+      }
+    },
+    {
+      "callbackbtn": {
+        "Row": "0",
+        "Btn": "0"
+      }
+    },
+    {
+      "callbackbtn": {
+        "Row": "0",
+        "Btn": "0"
+      }
+    },
+    {
+      "sendmsg": "end"
+    }
+  ]
+}
+	]
+}

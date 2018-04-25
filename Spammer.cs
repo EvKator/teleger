@@ -11,7 +11,7 @@ namespace Teleger
 {
     class Spammer
     {
-        List<PersonTask> pertasks { get; set; }
+        public List<PersonTask> pertasks { get; private set; }
         Log log;
         public static async Task<Spammer> LoadFromFile(string filename, string numsfilename, Log log)
         {

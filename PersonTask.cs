@@ -10,10 +10,10 @@ namespace Teleger
 {
     public partial class PersonTask
     {
-        public List<Script> Scripts { get; set; }
+        public List<Script> Scripts { get; private set; }
         List<string> chats { get; set; }
-        Manager mngr;
-        Log log;
+        public string Number { get; private set; }
+        public Log log { get; set; }
 
         
         private PersonTask()
@@ -27,15 +27,17 @@ namespace Teleger
             try
             {
                 PersonTask ptask = new PersonTask();
+                ptask.Number = num;
                 ptask.log = log;
                 ptask.Scripts = new List<Script>();
                 JObject json = JObject.Parse(strJson);
                 IList<JToken> jsonScripts = json["arr"].Children().ToList();
-                foreach (JToken jsonScript in jsonScripts)
+                foreach(var jsonScript in jsonScripts)
                 {
                     Script script = await Script.Create(num, jsonScript, log);
                     ptask.Scripts.Add(script);
                 }
+                log.ScriptsCount = jsonScripts.Count();
                 return ptask;
             }
             catch (Exception ex)
@@ -55,12 +57,15 @@ namespace Teleger
                     try
                     {
                         res = await script.Run(5000);
+
                     }
                     catch (Exception ex)
                     {
                         System.Windows.Forms.MessageBox.Show(ex.Message);
                         res = false;
                     }
+
+                    log.ScriptPerformed();
                 }
             }
         }
