@@ -11,14 +11,17 @@ Script file example:
 
     { "arr": 
         [ 
-            { "username":"SpeedMoneybot",       
-            "script": [      
-                {"sendmsg": "/start"},     
-                {"sendmsg": "➕ Подписаться на канал"},        
-                {"callbackbtn": { "Row":"0", "Btn":"0" } },      
-                {"callbackbtn": { "Row":"1", "Btn":"0" } }     
-            ] },     
-            { "username":"SpeedMoneybot",    
+            { 
+                "username":"SpeedMoneybot",       
+                "script": [      
+                    {"sendmsg": "/start"},     
+                    {"sendmsg": "➕ Подписаться на канал"},        
+                    {"callbackbtn": { "Row":"0", "Btn":"0" } },      
+                    {"callbackbtn": { "Row":"1", "Btn":"0" } }     
+                ]     
+            },     
+            {
+                "username":"SpeedMoneybot",    
                 "script": [    
                     {"sendmsg": "/start"},     
                     {"sendmsg": "/stop"} 
