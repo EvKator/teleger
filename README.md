@@ -36,7 +36,7 @@ Did not publish the whole project, only the sources, which helps to understand h
 I am ready to share the whole project, in personal correspondece    
 
 Contacts:     
-Telegram: <a href="t.me/u221b">@u221b</a>      
+Telegram: <a href="http://t.me/u221b">@u221b</a>      
 Skype: ev.kator     
 email: islyambagirov@gmail.com    
 
