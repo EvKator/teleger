@@ -1,15 +1,31 @@
 # tmmanager
 
-Advanced telegram spammer
+Advanced telegram spammer   
 
-Receives instructions from the file .json you can load by clicking 'load script' button 
-Also you need to connect file with the tm account numvers
+Receives instructions from the file .json you can load by clicking 'load script' button   
+Also you need to connect file with the tm account numvers  
 
-File with numbers - just a bunch of phone numvers, separated by '\n' char.
+File with numbers - just a bunch of phone numvers, separated by '\n' char.  
 
-Script file example:
+Script file example:  
 
-<code>{ "arr": [ { "username":"SpeedMoneybot", "script": [ {"sendmsg": "/start"}, {"sendmsg": "➕ Подписаться на канал"}, {"callbackbtn": { "Row":"0", "Btn":"0" } }, {"callbackbtn": { "Row":"1", "Btn":"0" } } ] }, { "username":"SpeedMoneybot", "script": [ {"sendmsg": "/start"}, {"sendmsg": "/stop"} ] } ] }</code>
+    { "arr": 
+        [ 
+            { "username":"SpeedMoneybot",       
+            "script": [      
+                {"sendmsg": "/start"},     
+                {"sendmsg": "➕ Подписаться на канал"},        
+                {"callbackbtn": { "Row":"0", "Btn":"0" } },      
+                {"callbackbtn": { "Row":"1", "Btn":"0" } }     
+            ] },     
+            { "username":"SpeedMoneybot",    
+                "script": [    
+                    {"sendmsg": "/start"},     
+                    {"sendmsg": "/stop"} 
+                ]     
+            }     
+        ] 
+    }    
 
 You can create a script using <a href='https://github.com/EvKator/TeleScriptBuilder'>TeleScriptBuilder</a>
 
