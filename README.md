@@ -2,16 +2,16 @@
 
 Advanced telegram spammer   
 
-Automatically enters chats, channels, clicks on any buttons in bots, sends messages.   
-Сan work with multiple accounts, each with its own flow and progress bar in the control unit.   
-Could be used to automatically earn by performing task in the bots for increasing the number of subscribers, etc (as SpeedMoneybot) or (if you have a lot of accs) to increase the number of subscribers for money.    
+Automatically enters to chats & channels, clicks on any buttons in bots, sends messages.      
+This can be configured to work with multiple accounts, each with its own flow and progress bar in the control unit.     
+Could be used to automatically earn by performing task in the bots for increasing the number of subscribers, etc (as SpeedMoneybot) or (if you have a lot of accounts) to increase the number of subscribers for money.    
+
 
 Receives instructions from the file .json you can load by clicking 'load script' button     
-Also you need to connect file with the tm account numvers     
+Also you can connect file with the their account numbers      
+File with numbers - just a bunch of phone numbers, separated by '\n' char.      
 
-File with numbers - just a bunch of phone numvers, separated by '\n' char.    
-
-Script file example:  
+Script file example:     
 
     { "arr": 
         [ 
@@ -36,8 +36,9 @@ Script file example:
 
 You can create a script using <a href='https://github.com/EvKator/TeleScriptBuilder'>TeleScriptBuilder</a>    
 
-Did not publish the whole project, only the sources, which helps to understand how the program works     
-I am ready to share the whole project, in personal correspondece    
+These are the synopsis of the project and not complete details; only the sources are here to understand how the program works or basics.     
+Please let me know in my below contacts so we can discuss further and I can share details of whole project    
+Thank you     
 
 Contacts:     
 Telegram: <a href="http://t.me/u221b">@u221b</a>      
