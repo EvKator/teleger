@@ -36,13 +36,5 @@ Script file example:
 
 You can create a script using <a href='https://github.com/EvKator/TeleScriptBuilder'>TeleScriptBuilder</a>    
 
-These are the synopsis of the project and not complete details; only the sources are here to understand how the program works or basics.     
-Please let me know in my below contacts so we can discuss further and I can share details of whole project    
-Thank you     
-
-Contacts:     
-Telegram: <a href="http://t.me/u221b">@u221b</a>      
-Skype: ev.kator     
-email: islyambagirov@gmail.com    
 
 Demonstration: <https://youtu.be/VIlNSSt0zLU> 
